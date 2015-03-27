@@ -24,12 +24,14 @@ import com.google.common.eventbus.Subscribe;
 import org.apache.shiro.subject.SimplePrincipalCollection;
 
 /**
- * TODO: Determine if this is still useful/relevant (moved over from nexus-pro).
+ * Ensures that API keys for deleted users are removed.
+ *
+ * TODO: Ensure this receives events.
  */
 @Named
 @Singleton
 final class NugetApiKeyEventInspector
-//    implements EventSubscriber
+    //implements EventSubscriber
 {
   @Inject
   private NugetApiKeyStore keyStore;

@@ -39,6 +39,8 @@ import org.eclipse.sisu.Description;
 public final class NugetApiKeyRealm
     extends AuthenticatingRealm
 {
+  public static final String ID = "NuGet-Realm";
+
   @Inject
   private NugetApiKeyStore keyStore;
 
