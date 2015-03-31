@@ -310,54 +310,7 @@ public abstract class AbstractMavenRepository
   @Override
   public abstract boolean isMavenMetadataPath(String path);
 
-  public abstract boolean isMavenArtifactChecksumPath(String path);
-
   public abstract boolean shouldServeByPolicies(ResourceStoreRequest request);
-
-  @Override
-  public void storeItemWithChecksums(ResourceStoreRequest request, InputStream is, Map<String, String> userAttributes)
-      throws UnsupportedStorageOperationException, IllegalOperationException, StorageException, AccessDeniedException
-  {
-    if (log.isDebugEnabled()) {
-      log.debug("storeItemWithChecksums() :: " + request.getRequestPath());
-    }
-
-    getArtifactStoreHelper().storeItemWithChecksums(request, is, userAttributes);
-  }
-
-  @Override
-  public void deleteItemWithChecksums(ResourceStoreRequest request)
-      throws UnsupportedStorageOperationException, IllegalOperationException, ItemNotFoundException,
-             StorageException, AccessDeniedException
-  {
-    if (log.isDebugEnabled()) {
-      log.debug("deleteItemWithChecksums() :: " + request.getRequestPath());
-    }
-
-    getArtifactStoreHelper().deleteItemWithChecksums(request);
-  }
-
-  @Override
-  public void storeItemWithChecksums(boolean fromTask, AbstractStorageItem item)
-      throws UnsupportedStorageOperationException, IllegalOperationException, StorageException
-  {
-    if (log.isDebugEnabled()) {
-      log.debug("storeItemWithChecksums() :: " + item.getRepositoryItemUid().toString());
-    }
-
-    getArtifactStoreHelper().storeItemWithChecksums(fromTask, item);
-  }
-
-  @Override
-  public void deleteItemWithChecksums(boolean fromTask, ResourceStoreRequest request)
-      throws UnsupportedStorageOperationException, IllegalOperationException, ItemNotFoundException, StorageException
-  {
-    if (log.isDebugEnabled()) {
-      log.debug("deleteItemWithChecksums() :: " + request.toString());
-    }
-
-    getArtifactStoreHelper().deleteItemWithChecksums(fromTask, request);
-  }
 
   @Override
   public MetadataManager getMetadataManager() {
@@ -554,11 +507,6 @@ public abstract class AbstractMavenRepository
     return shouldAddToNFC;
   }
 
-  @Override
-  protected boolean shouldNeglectItemNotFoundExOnDelete(ResourceStoreRequest request, ItemNotFoundException ex) {
-    return isMavenArtifactChecksumPath(request.getRequestPath());
-  }
-
   /**
    * Deletes item and regenerates Maven metadata, if repository is a hosted repository and maven-metadata.xml file is
    * present.
@@ -569,19 +517,8 @@ public abstract class AbstractMavenRepository
   protected void doDeleteItem(final ResourceStoreRequest request)
       throws UnsupportedStorageOperationException, ItemNotFoundException, StorageException
   {
-    try {
-      super.doDeleteItem(request);
-    }
-    catch (ItemNotFoundException ex) {
-      // NEXUS-5773, NEXUS-5418
-      // Since Nx 2.5, checksum are not stored on disk
-      // but are stored as attributes. Still, upgraded systems
-      // might have them on disk, so delete is attempted
-      // but INFex on Checksum file in general can be neglected here.
-      if (!shouldNeglectItemNotFoundExOnDelete(request, ex)) {
-        throw ex;
-      }
-    }
+    super.doDeleteItem(request);
+
     // regenerate maven metadata for parent of this item if is a hosted maven repo and it contains maven-metadata.xml
     if (request.isExternal() && getRepositoryKind().isFacetAvailable(MavenHostedRepository.class)) {
       String parentPath = request.getRequestPath();
