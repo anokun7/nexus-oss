@@ -12,6 +12,8 @@
  */
 package com.sonatype.nexus.repository.nuget.internal.security;
 
+import javax.annotation.Nullable;
+
 import org.apache.shiro.subject.PrincipalCollection;
 
 /**
@@ -29,6 +31,7 @@ public interface NugetApiKeyStore
    *
    * @return {@code null} if no key has been assigned
    */
+  @Nullable
   char[] getApiKey(PrincipalCollection principals);
 
   /**
@@ -36,6 +39,7 @@ public interface NugetApiKeyStore
    *
    * @return {@code null} if the key is invalid or stale
    */
+  @Nullable
   PrincipalCollection getPrincipals(char[] apiKey);
 
   /**
