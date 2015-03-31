@@ -12,16 +12,12 @@
  */
 package org.sonatype.nexus.proxy.maven;
 
-import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Map;
-import java.util.TreeMap;
 
 import javax.inject.Inject;
 
 import org.sonatype.configuration.ConfigurationException;
-import org.sonatype.nexus.proxy.AccessDeniedException;
 import org.sonatype.nexus.proxy.IllegalOperationException;
 import org.sonatype.nexus.proxy.ItemNotFoundException;
 import org.sonatype.nexus.proxy.LocalStorageException;
@@ -30,9 +26,7 @@ import org.sonatype.nexus.proxy.StorageException;
 import org.sonatype.nexus.proxy.events.RepositoryConfigurationUpdatedEvent;
 import org.sonatype.nexus.proxy.events.RepositoryEventEvictUnusedItems;
 import org.sonatype.nexus.proxy.events.RepositoryEventRecreateMavenMetadata;
-import org.sonatype.nexus.proxy.item.AbstractStorageItem;
 import org.sonatype.nexus.proxy.item.RepositoryItemUid;
-import org.sonatype.nexus.proxy.item.StorageFileItem;
 import org.sonatype.nexus.proxy.item.StorageItem;
 import org.sonatype.nexus.proxy.item.uid.IsHiddenAttribute;
 import org.sonatype.nexus.proxy.maven.EvictUnusedMavenItemsWalkerProcessor.EvictUnusedMavenItemsWalkerFilter;
@@ -55,15 +49,6 @@ import org.codehaus.plexus.util.StringUtils;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.sonatype.nexus.proxy.ItemNotFoundException.reasonFor;
-import static org.sonatype.nexus.proxy.maven.ChecksumContentValidator.ATTR_REMOTE_MD5;
-import static org.sonatype.nexus.proxy.maven.ChecksumContentValidator.ATTR_REMOTE_SHA1;
-import static org.sonatype.nexus.proxy.maven.ChecksumContentValidator.SUFFIX_MD5;
-import static org.sonatype.nexus.proxy.maven.ChecksumContentValidator.SUFFIX_SHA1;
-import static org.sonatype.nexus.proxy.maven.ChecksumContentValidator.doRetrieveMD5;
-import static org.sonatype.nexus.proxy.maven.ChecksumContentValidator.doRetrieveSHA1;
-import static org.sonatype.nexus.proxy.maven.ChecksumContentValidator.doStoreMD5;
-import static org.sonatype.nexus.proxy.maven.ChecksumContentValidator.doStoreSHA1;
-import static org.sonatype.nexus.proxy.maven.ChecksumContentValidator.newHashItem;
 
 /**
  * The abstract (layout unaware) Maven Repository.
@@ -334,35 +319,7 @@ public abstract class AbstractMavenRepository
           this, getRepositoryPolicy()));
     }
 
-    if (getRepositoryKind().isFacetAvailable(ProxyRepository.class)
-        && !request.getRequestPath().startsWith("/.")) {
-      if (request.getRequestPath().endsWith(SUFFIX_SHA1)) {
-        return doRetrieveSHA1(this, request, doRetrieveArtifactItem(request, SUFFIX_SHA1)).getHashItem();
-      }
-
-      if (request.getRequestPath().endsWith(SUFFIX_MD5)) {
-        return doRetrieveMD5(this, request, doRetrieveArtifactItem(request, SUFFIX_MD5)).getHashItem();
-      }
-    }
-
     return super.doRetrieveItem(request);
-  }
-
-  /**
-   * Retrieves artifact corresponding to .sha1/.md5 request (or any request suffix).
-   */
-  private StorageItem doRetrieveArtifactItem(ResourceStoreRequest hashRequest, String suffix)
-      throws ItemNotFoundException, StorageException, IllegalOperationException
-  {
-    final String hashPath = hashRequest.getRequestPath();
-    final String itemPath = hashPath.substring(0, hashPath.length() - suffix.length());
-    hashRequest.pushRequestPath(itemPath);
-    try {
-      return super.doRetrieveItem(hashRequest);
-    }
-    finally {
-      hashRequest.popRequestPath();
-    }
   }
 
   @Override
@@ -393,28 +350,7 @@ public abstract class AbstractMavenRepository
   {
     final ResourceStoreRequest request = new ResourceStoreRequest(item); // this is local only request
     if (shouldServeByPolicies(request)) {
-      if (getRepositoryKind().isFacetAvailable(ProxyRepository.class) && item instanceof StorageFileItem
-          && !item.getPath().startsWith("/.")) {
-        try {
-          if (item.getPath().endsWith(SUFFIX_SHA1)) {
-            doStoreSHA1(this, doRetrieveArtifactItem(request, SUFFIX_SHA1), (StorageFileItem) item);
-          }
-          else if (item.getPath().endsWith(SUFFIX_MD5)) {
-            doStoreMD5(this, doRetrieveArtifactItem(request, SUFFIX_MD5), (StorageFileItem) item);
-          }
-          else {
-            super.storeItem(fromTask, item);
-          }
-        }
-        catch (ItemNotFoundException e) {
-          // ignore storeItem request
-          // this is a maven2 proxy repository, it is requested to store .sha1/.md5 file
-          // and not there is not corresponding artifact
-        }
-      }
-      else {
-        super.storeItem(fromTask, item);
-      }
+      super.storeItem(fromTask, item);
     }
     else {
       String msg =
@@ -429,16 +365,6 @@ public abstract class AbstractMavenRepository
   }
 
   @Override
-  public AbstractStorageItem doCacheItem(AbstractStorageItem item)
-      throws LocalStorageException
-  {
-    final AbstractStorageItem result = super.doCacheItem(item);
-    result.getRepositoryItemAttributes().remove(ATTR_REMOTE_SHA1);
-    result.getRepositoryItemAttributes().remove(ATTR_REMOTE_MD5);
-    return result;
-  }
-
-  @Override
   public boolean isCompatible(Repository repository) {
     if (super.isCompatible(repository) && MavenRepository.class.isAssignableFrom(repository.getClass())
         && getRepositoryPolicy().equals(((MavenRepository) repository).getRepositoryPolicy())) {
@@ -450,45 +376,6 @@ public abstract class AbstractMavenRepository
 
   // =================================================================================
   // DefaultRepository customizations
-
-  @Override
-  protected Collection<StorageItem> doListItems(ResourceStoreRequest request)
-      throws ItemNotFoundException, StorageException
-  {
-    Collection<StorageItem> items = super.doListItems(request);
-    if (getRepositoryKind().isFacetAvailable(ProxyRepository.class)) {
-      Map<String, StorageItem> result = new TreeMap<String, StorageItem>();
-      for (StorageItem item : items) {
-        putChecksumItem(result, request, item, ATTR_REMOTE_SHA1, SUFFIX_SHA1);
-        putChecksumItem(result, request, item, ATTR_REMOTE_MD5, SUFFIX_MD5);
-      }
-
-      for (StorageItem item : items) {
-        if (!result.containsKey(item.getPath())) {
-          result.put(item.getPath(), item);
-        }
-      }
-
-      items = result.values();
-    }
-    return items;
-  }
-
-  private void putChecksumItem(Map<String, StorageItem> checksums, ResourceStoreRequest request,
-                               StorageItem artifact, String attrname, String suffix)
-  {
-    String hash = artifact.getRepositoryItemAttributes().get(attrname);
-    if (hash != null) {
-      String hashPath = artifact.getPath() + suffix;
-      request.pushRequestPath(hashPath);
-      try {
-        checksums.put(hashPath, newHashItem(this, request, artifact, hash));
-      }
-      finally {
-        request.popRequestPath();
-      }
-    }
-  }
 
   /**
    * Beside original behavior, only add to NFC when remote access is not rejected by autorouting.
