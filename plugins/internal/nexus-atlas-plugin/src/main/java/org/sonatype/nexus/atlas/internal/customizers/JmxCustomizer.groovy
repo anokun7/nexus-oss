@@ -97,6 +97,8 @@ class JmxCustomizer
           return null
         }
 
+        // TODO: Cope with password-like fields where we can detect .*password.* or something?
+
         def type = value.getClass()
         log.trace "Rendering type: $type"
 
