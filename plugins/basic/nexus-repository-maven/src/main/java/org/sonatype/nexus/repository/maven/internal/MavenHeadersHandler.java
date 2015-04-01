@@ -16,17 +16,16 @@ import javax.annotation.Nonnull;
 import javax.inject.Named;
 import javax.inject.Singleton;
 
-import org.sonatype.nexus.common.hash.HashAlgorithm;
 import org.sonatype.nexus.repository.http.HttpStatus;
-import org.sonatype.nexus.repository.maven.internal.policy.ChecksumPolicy;
+import org.sonatype.nexus.repository.view.Content;
 import org.sonatype.nexus.repository.view.Context;
 import org.sonatype.nexus.repository.view.Handler;
+import org.sonatype.nexus.repository.view.Payload;
 import org.sonatype.nexus.repository.view.PayloadResponse;
 import org.sonatype.nexus.repository.view.Response;
 import org.sonatype.sisu.goodies.common.ComponentSupport;
 import org.sonatype.sisu.goodies.common.Iso8601Date;
 
-import com.google.common.hash.HashCode;
 import com.google.common.net.HttpHeaders;
 import org.joda.time.DateTime;
 
@@ -45,17 +44,19 @@ public class MavenHeadersHandler
   @Override
   public Response handle(final @Nonnull Context context) throws Exception {
     final Response response = context.proceed();
-    if (response.getStatus().getCode() == HttpStatus.OK && response instanceof PayloadResponse) {
-      final MavenPayload payload = (MavenPayload) ((PayloadResponse) response).getPayload();
-      final DateTime lastModified = payload.getLastModified();
-      if (lastModified != null) {
-        response.getHeaders().set(HttpHeaders.LAST_MODIFIED, Iso8601Date.format(lastModified.toDate()));
-      }
-      final MavenFacet mavenFacet = context.getRepository().facet(MavenFacet.class);
-      if (ChecksumPolicy.STRICT == mavenFacet.getChecksumPolicy()) {
-        final HashCode sha1HashCode = payload.getHashCodes().get(HashAlgorithm.SHA1);
-        if (sha1HashCode != null) {
-          response.getHeaders().set(HttpHeaders.ETAG, "\"{SHA1{" + sha1HashCode + "}}\"");
+    if (response.getStatus().isSuccessful() && response instanceof PayloadResponse) {
+      final Payload payload = ((PayloadResponse) response).getPayload();
+      if (payload instanceof Content) {
+        final Content content = (Content) payload;
+        final DateTime lastModified = content.getAttributes().get(Content.CONTENT_LAST_MODIFIED, DateTime.class);
+        if (lastModified != null) {
+          response.getHeaders().set(HttpHeaders.LAST_MODIFIED, Iso8601Date.format(lastModified.toDate()));
+        }
+        if (response.getStatus().getCode() == HttpStatus.OK) {
+          final String etag = content.getAttributes().get(Content.CONTENT_ETAG, String.class);
+          if (etag != null) {
+            response.getHeaders().set(HttpHeaders.ETAG, "\"" + etag + "\"");
+          }
         }
       }
     }
