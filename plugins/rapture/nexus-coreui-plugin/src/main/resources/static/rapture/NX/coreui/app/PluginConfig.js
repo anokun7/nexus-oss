@@ -121,9 +121,9 @@ Ext.define('NX.coreui.app.PluginConfig', {
         return NX.app.Application.pluginActive('org.sonatype.nexus.plugins:nexus-coreui-plugin');
       }
     },
-    { id: 'NX.coreui.controller.NuGetRepositorySettings',
+    { id: 'NX.coreui.controller.NuGetApiKey',
       active: function () {
-        return NX.app.Application.pluginActive('com.sonatype.nexus.plugins:nexus-nuget-plugin');
+        return NX.app.Application.pluginActive('org.sonatype.nexus.plugins:nexus-coreui-plugin');
       }
     },
     { id: 'NX.coreui.controller.NuGetUpload',

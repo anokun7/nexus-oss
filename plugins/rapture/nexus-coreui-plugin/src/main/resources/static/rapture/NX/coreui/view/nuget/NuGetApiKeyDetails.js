@@ -23,7 +23,8 @@ Ext.define('NX.coreui.view.nuget.NuGetApiKeyDetails', {
   requires: [
     'NX.Icons',
     'NX.Messages',
-    'NX.I18n'
+    'NX.I18n',
+    'NX.util.Url'
   ],
 
   title: 'NuGet API Key',
@@ -32,11 +33,6 @@ Ext.define('NX.coreui.view.nuget.NuGetApiKeyDetails', {
   constrain: true,
   width: 640,
   resizable: false,
-
-  /**
-   * @cfg {String} repository id
-   */
-  repositoryId: undefined,
 
   /**
    * @cfg {String} NuGet API Key
@@ -59,42 +55,52 @@ Ext.define('NX.coreui.view.nuget.NuGetApiKeyDetails', {
           items: [
             { xtype: 'component', html: NX.Icons.img('nuget-default', 'x32') },
             { xtype: 'label', margin: '0 0 0 5',
-              html: 'NuGet API Key enables pushing packages using NuGet.exe.<br/>' +
-                  '<span style="font-weight: bold;">Keep this key secret!</span>'
+              html: NX.I18n.get('NUGET_APIKEY_DETAIL_DESCRIPTION')
             }
+          ]
+        },
+
+        {
+          xtype: 'panel',
+          layout: 'vbox',
+          margin: '0 0 10 0',
+          items: [
+            {
+              xtype: 'label',
+              margin: '5 0 0 0',
+              text: NX.I18n.get('NUGET_APIKEY_DETAIL_APIKEY_LABEL')
+            },
+            {
+              xtype: 'textfield',
+              value: me.apiKey,
+              readOnly: true,
+              selectOnFocus: true,
+              fieldStyle: {
+                padding: '2px',
+                'font-family': 'monospace'
+              }
+            },
+            {
+              xtype: 'label',
+              margin: '5 0 0 0',
+              text: NX.I18n.get('NUGET_APIKEY_DETAIL_REGISTER_LABEL')
+            },
+            {
+              xtype: 'textfield',
+              value: NX.I18n.format('NUGET_APIKEY_DETAIL_REGISTER_EXAMPLE', me.apiKey,
+                  NX.util.Url.urlOf('repository/{repository}')),
+              readOnly: true,
+              selectOnFocus: true,
+              fieldStyle: {
+                padding: '2px',
+                'font-family': 'monospace'
+              }
+            },
           ]
         },
         {
           xtype: 'label',
-          html: '<p>Your NuGet API Key is:</p>'
-        },
-        {
-          xtype: 'textfield',
-          value: me.apiKey,
-          readOnly: true,
-          selectOnFocus: true,
-          fieldStyle: {
-            padding: '2px',
-            'font-family': 'monospace'
-          }
-        },
-        {
-          xtype: 'label',
-          html: '<p>You can register this key with the following command:</p>'
-        },
-        {
-          xtype: 'textfield',
-          value: 'nuget setapikey ' + me.apiKey + ' -source ' + me.repositoryId,
-          readOnly: true,
-          selectOnFocus: true,
-          fieldStyle: {
-            padding: '2px',
-            'font-family': 'monospace'
-          }
-        },
-        {
-          xtype: 'label',
-          html: '<p>This window will automatically close after one minute.</p>'
+          html: '<em>'+NX.I18n.get('NUGET_APIKEY_DETAIL_AUTOCLOSE_LABEL')+'</em>'
         }
       ],
       buttonAlign: 'left',
@@ -110,7 +116,7 @@ Ext.define('NX.coreui.view.nuget.NuGetApiKeyDetails', {
     // Automatically close the window
     Ext.defer(function() {
       if (me.isVisible()) { // ignore if already closed
-        NX.Messages.add({ text: NX.I18n.get('BROWSE_NUGET_TIMEOUT_SUCCESS') });
+        NX.Messages.add({ text: NX.I18n.get('NUGET_APIKEY_DETAIL_AUTOCLOSE_MESSAGE') });
         me.close();
       }
     }, 1 * 60 * 1000); // 1 minute

@@ -62,6 +62,12 @@ public class NugetApiKeyStoreImpl
     this.databaseInstance = checkNotNull(databaseInstance);
     this.entityAdapter = checkNotNull(entityAdapter);
     this.principalsHelper = checkNotNull(principalsHelper);
+    try {
+      start();
+    }
+    catch (Exception e) {
+      e.printStackTrace();
+    }
   }
 
   @Override

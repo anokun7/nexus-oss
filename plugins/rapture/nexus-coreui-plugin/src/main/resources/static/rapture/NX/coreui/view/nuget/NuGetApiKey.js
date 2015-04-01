@@ -17,9 +17,9 @@
  *
  * @since 3.0
  */
-Ext.define('NX.coreui.view.nuget.NuGetRepositorySettings', {
+Ext.define('NX.coreui.view.nuget.NuGetApiKey', {
   extend: 'NX.view.SettingsPanel',
-  alias: 'widget.nx-coreui-nuget-repository-settings',
+  alias: 'widget.nx-coreui-nuget-apikey',
   requires: [
     'NX.Conditions',
     'NX.util.Url'
@@ -27,7 +27,6 @@ Ext.define('NX.coreui.view.nuget.NuGetRepositorySettings', {
 
   config: {
     active: false,
-    repository: undefined
   },
 
   /**
@@ -39,33 +38,12 @@ Ext.define('NX.coreui.view.nuget.NuGetRepositorySettings', {
     me.items = [
       {
         xtype: 'form',
-        title: 'Package Source',
         ui: 'nx-subsection',
 
         items: [
           {
             xtype: 'label',
-            html: '<p>You can register this source with the following command:</p>'
-          },
-          {
-            xtype: 'textfield',
-            name: 'packageSource',
-            itemId: 'packageSource',
-            readOnly: true,
-            submitValue: false,
-            allowBlank: true,
-            selectOnFocus: true
-          }
-        ]
-      },
-      {
-        xtype: 'form',
-        title: 'API Key',
-        ui: 'nx-subsection',
-
-        items: [
-          {
-            xtype: 'label',
+            // TODO - KR move this to pluginStrings.js
             html: '<p>A new API Key will be created the first time it is accessed.</p>' +
                 '<p>Resetting your API Key will invalidate the current key.</p>'
           }
@@ -80,20 +58,6 @@ Ext.define('NX.coreui.view.nuget.NuGetRepositorySettings', {
     ];
 
     me.callParent(arguments);
-  },
-
-  /**
-   * @private
-   * Sets value of package source.
-   */
-  applyRepository: function(repositoryModel) {
-    var me = this,
-        packageSource = me.down('#packageSource'),
-        url = NX.util.Url.urlOf('service/local/nuget/' + repositoryModel.getId() + '/');  // FIXME: This is a restlet endpoint
-
-    packageSource.setValue('nuget sources add -name ' + repositoryModel.getId() + ' -source ' + url);
-
-    return repositoryModel;
   }
 
 });
