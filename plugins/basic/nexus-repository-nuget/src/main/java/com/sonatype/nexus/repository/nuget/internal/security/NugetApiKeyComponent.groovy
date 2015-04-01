@@ -43,7 +43,7 @@ class NugetApiKeyComponent
         validateAuthToken(authToken)
 
         def principals = securityHelper.subject().principals
-        char[] apiKey = keyStore.get().getApiKey(principals)  //TODO - not started yet? how to force the lifecycle steps to run first
+        char[] apiKey = keyStore.get().getApiKey(principals)
         if (!apiKey) {
             apiKey = keyStore.get().createApiKey(principals)
         }

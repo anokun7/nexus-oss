@@ -21,12 +21,11 @@ Ext.define('NX.coreui.view.nuget.NuGetApiKey', {
   extend: 'NX.view.SettingsPanel',
   alias: 'widget.nx-coreui-nuget-apikey',
   requires: [
-    'NX.Conditions',
-    'NX.util.Url'
+    'NX.I18n'
   ],
 
   config: {
-    active: false,
+    active: false
   },
 
   /**
@@ -43,16 +42,15 @@ Ext.define('NX.coreui.view.nuget.NuGetApiKey', {
         items: [
           {
             xtype: 'label',
-            // TODO - KR move this to pluginStrings.js
-            html: '<p>A new API Key will be created the first time it is accessed.</p>' +
-                '<p>Resetting your API Key will invalidate the current key.</p>'
+            margin: '5 0 5 0',
+            text: NX.I18n.get('NUGET_APIKEY_INSTRUCTIONS')
           }
         ],
 
         buttonAlign: 'left',
         buttons: [
-          { text: 'Access API Key', action: 'access', glyph: 'xf023@FontAwesome' /* fa-lock */, disabled: true },
-          { text: 'Reset API Key', action: 'reset', ui: 'nx-danger', glyph: 'xf023@FontAwesome' /* fa-lock */, disabled: true }
+          { text: NX.I18n.get('NUGET_APIKEY_ACCESS_BUTTON'), action: 'access', glyph: 'xf023@FontAwesome' /* fa-lock */, disabled: true },
+          { text: NX.I18n.get('NUGET_APIKEY_RESET_BUTTON'), action: 'reset', ui: 'nx-danger', glyph: 'xf023@FontAwesome' /* fa-lock */, disabled: true }
         ]
       }
     ];
