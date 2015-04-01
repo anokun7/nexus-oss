@@ -17,7 +17,7 @@
  *
  * @since 3.0
  */
-Ext.define('NX.coreui.controller.NuGetRepositorySettings', {
+Ext.define('NX.coreui.controller.NuGetApiKey', {
   extend: 'Ext.app.Controller',
   requires: [
     'NX.Conditions',
@@ -27,11 +27,7 @@ Ext.define('NX.coreui.controller.NuGetRepositorySettings', {
 
   views: [
     'nuget.NuGetApiKeyDetails',
-    'nuget.NuGetRepositorySettings'
-  ],
-  refs: [
-    { ref: 'feature', selector: 'nx-coreui-repository-feature' },
-    { ref: 'panel', selector: 'nx-coreui-nuget-repository-settings' }
+    'nuget.NuGetApiKey'
   ],
 
   /**
@@ -47,45 +43,35 @@ Ext.define('NX.coreui.controller.NuGetRepositorySettings', {
       }
     });
 
+    me.getApplication().getFeaturesController().registerFeature([
+      {
+        mode: 'user',
+        path: '/NuGet API Token',
+        text: NX.I18n.get('NUGET_APIKEY_TITLE'),
+        description: NX.I18n.get('NUGET_APIKEY_SUB_TITLE'),
+        view: { xtype: 'nx-coreui-nuget-apikey' },
+        iconConfig: {
+          file: 'key.png',
+          variants: ['x16', 'x32']
+        },
+        visible: function () {
+          return true;
+        }
+      }
+    ], me);
+
     me.listen({
       component: {
-        'nx-coreui-repository-list': {
-          selection: me.onSelection
-        },
-        'nx-coreui-nuget-repository-settings button[action=access]': {
+        'nx-coreui-nuget-apikey button[action=access]': {
           click: me.accessApiKey,
           afterrender: me.bindAccessApiKeyButton
         },
-        'nx-coreui-nuget-repository-settings button[action=reset]': {
+        'nx-coreui-nuget-apikey button[action=reset]': {
           click: me.resetApiKey,
           afterrender: me.bindResetApiKeyButton
         }
       }
     });
-  },
-
-  /**
-   * @private
-   * Add "NuGet" panel to repository tabs, if not already present and/or load NuGet settings into the panel.
-   * @param {NX.coreui.view.repository.RepositoryList} grid repository grid
-   * @param {NX.coreui.model.Repository} model selected repository
-   */
-  onSelection: function(grid, model) {
-    var me = this,
-        panel = me.getPanel();
-
-    if (model && NX.Permissions.check('apikey:access', 'read') && model.get('format') === 'nuget') {
-      if (!panel) {
-        me.getFeature().addTab({ xtype: 'nx-coreui-nuget-repository-settings', title: NX.I18n.get('LEGACY_ADMIN_REPOSITORIES_DETAILS_NUGET_TAB') });
-        panel = me.getPanel();
-      }
-      panel.setRepository(model);
-    }
-    else {
-      if (panel) {
-        me.getFeature().removeTab(panel);
-      }
-    }
   },
 
   /**
@@ -99,7 +85,7 @@ Ext.define('NX.coreui.controller.NuGetRepositorySettings', {
         NX.I18n.get('LEGACY_ADMIN_REPOSITORIES_NUGET_ACCESS'),
         {
           success: function(authToken) {
-            NX.direct.nuget_NuGet.readKey(authToken, function(response) {
+            NX.direct.nuget_NuGetApiKey.readKey(authToken, function(response) {
               if (Ext.isDefined(response) && response.success) {
                 me.showApiKey(response.data);
               }
@@ -120,7 +106,7 @@ Ext.define('NX.coreui.controller.NuGetRepositorySettings', {
         NX.I18n.get('LEGACY_ADMIN_REPOSITORIES_NUGET_RESET'),
         {
           success: function(authToken) {
-            NX.direct.nuget_NuGet.resetKey(authToken, function(response) {
+            NX.direct.nuget_NuGetApiKey.resetKey(authToken, function(response) {
               if (Ext.isDefined(response) && response.success) {
                 me.showApiKey(response.data);
               }
@@ -136,10 +122,9 @@ Ext.define('NX.coreui.controller.NuGetRepositorySettings', {
    * @param {String} apiKey to show
    */
   showApiKey: function(apiKey) {
-    var me = this,
-        repositoryId = me.getPanel().getRepository().getId();
+    var me = this;
 
-    Ext.widget('nx-coreui-nuget-apikeydetails', { repositoryId: repositoryId, apiKey: apiKey });
+    Ext.widget('nx-coreui-nuget-apikeydetails', { apiKey: apiKey });
   },
 
   /**
