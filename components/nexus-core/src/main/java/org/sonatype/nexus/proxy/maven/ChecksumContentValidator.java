@@ -180,7 +180,7 @@ public class ChecksumContentValidator
       }
 
       String hash = attributes.get(attrname);
-      if (hash == null || request.isRequestAsExpired()) {
+      if (hash == null || request.isRequestAsExpired() || !hash.equals(attributes.get(inspector))) {
         try {
           final StorageFileItem remoteItem =
               (StorageFileItem) proxy.getRemoteStorage().retrieveItem(proxy, request, proxy.getRemoteUrl());
