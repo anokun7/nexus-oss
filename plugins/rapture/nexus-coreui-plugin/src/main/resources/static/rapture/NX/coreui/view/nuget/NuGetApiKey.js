@@ -13,7 +13,7 @@
 /*global Ext, NX*/
 
 /**
- * NuGet repository settings form.
+ * NuGet Api Key.
  *
  * @since 3.0
  */

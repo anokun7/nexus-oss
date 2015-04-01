@@ -16,7 +16,11 @@ import org.apache.shiro.authz.annotation.RequiresAuthentication
 import org.apache.shiro.authz.annotation.RequiresPermissions
 import org.hibernate.validator.constraints.NotEmpty
 
-
+/**
+ * Managing per-user NuGet Api Keys.
+ * 
+ * @since 3.0
+ */
 @Named
 @Singleton
 @DirectAction(action = 'nuget_NuGetApiKey')
