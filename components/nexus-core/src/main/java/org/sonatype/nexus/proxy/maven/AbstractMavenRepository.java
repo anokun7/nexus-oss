@@ -489,13 +489,14 @@ public abstract class AbstractMavenRepository
   @Override
   protected boolean doExpireProxyCaches(ResourceStoreRequest request, WalkerFilter filter) {
 
+    // special handling if this is a remote checksum request
     if (getRepositoryKind().isFacetAvailable(ProxyRepository.class)
-        && !request.getRequestPath().startsWith("/.")) {
+        && request.getRequestPath() != null && !request.getRequestPath().startsWith("/.")) {
+
       if (request.getRequestPath().endsWith(SUFFIX_SHA1)) {
         expireRemoteHash(request, SUFFIX_SHA1, ATTR_REMOTE_SHA1);
       }
-
-      if (request.getRequestPath().endsWith(SUFFIX_MD5)) {
+      else if (request.getRequestPath().endsWith(SUFFIX_MD5)) {
         expireRemoteHash(request, SUFFIX_MD5, ATTR_REMOTE_MD5);
       }
     }
@@ -508,7 +509,9 @@ public abstract class AbstractMavenRepository
     final String itemPath = hashPath.substring(0, hashPath.length() - suffix.length());
     hashRequest.pushRequestPath(itemPath);
     try {
-      getLocalStorage().retrieveItem(this, hashRequest).getRepositoryItemAttributes().remove(remoteAttribute);
+      // TODO: do we need to persist this? or will remote hash be refetched before attributes are re-loaded?
+      StorageItem artifact = getLocalStorage().retrieveItem(this, hashRequest);
+      artifact.getRepositoryItemAttributes().remove(remoteAttribute);
     }
     catch (Exception e) {
       log.debug("Skip expiring remote hash in repository {} because it does not contain path='{}'.", this, itemPath);
