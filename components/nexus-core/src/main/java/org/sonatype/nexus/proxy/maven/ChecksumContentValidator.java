@@ -241,17 +241,17 @@ public class ChecksumContentValidator
   private static void doStoreChechsumItem(ProxyRepository proxy, StorageItem artifact, String attrname, String hash)
       throws IOException
   {
-    final RepositoryItemUid itemUid = artifact.getRepositoryItemUid();
-    itemUid.getLock().lock(Action.update);
-    final Attributes attributes = artifact.getRepositoryItemAttributes();
-    try {
-      if (hash != null) {
+    if (hash != null) {
+      final RepositoryItemUid itemUid = artifact.getRepositoryItemUid();
+      itemUid.getLock().lock(Action.update);
+      final Attributes attributes = artifact.getRepositoryItemAttributes();
+      try {
         attributes.put(attrname, hash);
+        proxy.getAttributesHandler().storeAttributes(artifact);
       }
-      proxy.getAttributesHandler().storeAttributes(artifact);
-    }
-    finally {
-      itemUid.getLock().unlock();
+      finally {
+        itemUid.getLock().unlock();
+      }
     }
   }
 
