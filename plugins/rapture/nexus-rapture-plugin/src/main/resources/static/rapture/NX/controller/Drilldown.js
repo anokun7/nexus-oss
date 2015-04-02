@@ -72,7 +72,7 @@ Ext.define('NX.controller.Drilldown', {
   },
 
   /**
-   * @private
+   * @override
    */
   init: function () {
     var me = this,
@@ -143,6 +143,18 @@ Ext.define('NX.controller.Drilldown', {
     if (me.features) {
       me.getApplication().getFeaturesController().registerFeature(me.features, me);
     }
+
+    me.addEvents(
+      /**
+       * @event beforeload
+       * Fires before a store is loaded
+       *
+       * @param index Which master to load
+       * @param bookmark The bookmark to navigate to
+       * @param cb The callback function to call after load
+       */
+      'beforeload'
+    );
   },
 
   /**
@@ -168,12 +180,7 @@ Ext.define('NX.controller.Drilldown', {
    * Whenever the first list loads, trigger a navigation event
    */
   onAfterRender: function () {
-    var me = this;/*,
-      lists = me.getLists(),
-      last = lists[lists.length - 1];*/
-
-    // Trigger navigation when the last list loads
-    //last.mon(last.getStore(), 'load', me.onStoreLoad, me);
+    var me = this;
 
     // Start loading the lists
     me.loadStore(Ext.emptyFn);
@@ -189,7 +196,9 @@ Ext.define('NX.controller.Drilldown', {
     var me = this,
       bookmark = NX.Bookmarks.getBookmark().getSegments();
 
-    me.loadStoreAtIndex(0, bookmark, cb);
+    if (me.fireEvent('beforeload', 0, bookmark, cb)) {
+      me.loadStoreAtIndex(0, bookmark, cb);
+    }
   },
 
   /**

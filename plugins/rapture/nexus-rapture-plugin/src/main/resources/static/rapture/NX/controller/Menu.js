@@ -121,6 +121,9 @@ Ext.define('NX.controller.Menu', {
         },
         '#Refresh': {
           beforerefresh: me.warnBeforeRefresh
+        },
+        '#Drilldown': {
+          beforeload: me.warnBeforeLoadStore
         }
       },
       component: {
@@ -730,6 +733,21 @@ Ext.define('NX.controller.Menu', {
     return me.warnBeforeNavigate(
       function() {
         button.fireEvent('click');
+      }
+    )
+  },
+
+  /**
+   * @private
+   * Check for unsaved changes before loading a drilldown store
+   */
+  warnBeforeLoadStore: function(index, bookmark, cb) {
+    var me = this;
+
+    console.log("warnBeforeLoadStore");
+    return me.warnBeforeNavigate(
+      function() {
+        NX.getApplication.getController('Drilldown').loadStoreAtIndex(index, bookmark, cb);
       }
     )
   },
