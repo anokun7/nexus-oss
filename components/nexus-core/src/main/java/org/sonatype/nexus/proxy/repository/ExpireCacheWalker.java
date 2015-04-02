@@ -12,12 +12,15 @@
  */
 package org.sonatype.nexus.proxy.repository;
 
+import org.sonatype.nexus.proxy.attributes.Attributes;
 import org.sonatype.nexus.proxy.item.StorageFileItem;
 import org.sonatype.nexus.proxy.maven.MavenProxyRepository;
 import org.sonatype.nexus.proxy.walker.AbstractFileWalkerProcessor;
 import org.sonatype.nexus.proxy.walker.WalkerContext;
 
 import static org.sonatype.nexus.proxy.maven.ChecksumContentValidator.ATTR_REMOTE_HASH_EXPIRED;
+import static org.sonatype.nexus.proxy.maven.ChecksumContentValidator.ATTR_REMOTE_MD5;
+import static org.sonatype.nexus.proxy.maven.ChecksumContentValidator.ATTR_REMOTE_SHA1;
 
 public class ExpireCacheWalker
     extends AbstractFileWalkerProcessor
@@ -48,7 +51,10 @@ public class ExpireCacheWalker
 
       if (isMavenProxy) {
         // expire remote hashes when expiring maven proxy cache
-        item.getRepositoryItemAttributes().put(ATTR_REMOTE_HASH_EXPIRED, "true");
+        Attributes attributes = item.getRepositoryItemAttributes();
+        if (attributes.containsKey(ATTR_REMOTE_SHA1) || attributes.containsKey(ATTR_REMOTE_MD5)) {
+          attributes.put(ATTR_REMOTE_HASH_EXPIRED, "true");
+        }
       }
 
       // store it

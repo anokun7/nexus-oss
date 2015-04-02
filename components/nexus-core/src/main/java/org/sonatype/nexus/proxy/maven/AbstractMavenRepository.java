@@ -27,6 +27,7 @@ import org.sonatype.nexus.proxy.ItemNotFoundException;
 import org.sonatype.nexus.proxy.LocalStorageException;
 import org.sonatype.nexus.proxy.ResourceStoreRequest;
 import org.sonatype.nexus.proxy.StorageException;
+import org.sonatype.nexus.proxy.attributes.Attributes;
 import org.sonatype.nexus.proxy.events.RepositoryConfigurationUpdatedEvent;
 import org.sonatype.nexus.proxy.events.RepositoryEventEvictUnusedItems;
 import org.sonatype.nexus.proxy.events.RepositoryEventRecreateMavenMetadata;
@@ -512,7 +513,10 @@ public abstract class AbstractMavenRepository
     try {
       // TODO: do we need to persist this? or will remote hash be refetched before attributes are re-loaded?
       StorageItem artifact = getLocalStorage().retrieveItem(this, hashRequest);
-      artifact.getRepositoryItemAttributes().put(ATTR_REMOTE_HASH_EXPIRED, "true");
+      Attributes attributes = artifact.getRepositoryItemAttributes();
+      if (attributes.containsKey(ATTR_REMOTE_SHA1) || attributes.containsKey(ATTR_REMOTE_MD5)) {
+        attributes.put(ATTR_REMOTE_HASH_EXPIRED, "true");
+      }
     }
     catch (Exception e) {
       log.debug("Skip expiring remote hash in repository {} because it does not contain path='{}'.", this, itemPath);
