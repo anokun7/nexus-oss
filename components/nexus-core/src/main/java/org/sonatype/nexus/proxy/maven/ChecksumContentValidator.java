@@ -66,6 +66,11 @@ public class ChecksumContentValidator
    */
   public static final String ATTR_REMOTE_MD5 = "remote.md5";
 
+  /**
+   * Key of item attribute that marks remote hashes as expired.
+   */
+  public static final String ATTR_REMOTE_HASH_EXPIRED = "remote.hash.expired";
+
   @Override
   protected void cleanup(ProxyRepository proxy, RemoteHashResponse remoteHash, boolean contentValid)
       throws LocalStorageException
@@ -180,7 +185,7 @@ public class ChecksumContentValidator
       }
 
       String hash = attributes.get(attrname);
-      if (hash == null || request.isRequestAsExpired()) {
+      if (hash == null || request.isRequestAsExpired() || attributes.containsKey(ATTR_REMOTE_HASH_EXPIRED)) {
         try {
           final StorageFileItem remoteItem =
               (StorageFileItem) proxy.getRemoteStorage().retrieveItem(proxy, request, proxy.getRemoteUrl());
@@ -247,6 +252,9 @@ public class ChecksumContentValidator
       final Attributes attributes = artifact.getRepositoryItemAttributes();
       try {
         attributes.put(attrname, hash);
+        attributes.remove(ATTR_REMOTE_HASH_EXPIRED);
+        attributes.remove("remote.no-sha1");
+        attributes.remove("remote.no-md5");
         proxy.getAttributesHandler().storeAttributes(artifact);
       }
       finally {

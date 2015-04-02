@@ -56,6 +56,7 @@ import org.codehaus.plexus.util.StringUtils;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.sonatype.nexus.proxy.ItemNotFoundException.reasonFor;
+import static org.sonatype.nexus.proxy.maven.ChecksumContentValidator.ATTR_REMOTE_HASH_EXPIRED;
 import static org.sonatype.nexus.proxy.maven.ChecksumContentValidator.ATTR_REMOTE_MD5;
 import static org.sonatype.nexus.proxy.maven.ChecksumContentValidator.ATTR_REMOTE_SHA1;
 import static org.sonatype.nexus.proxy.maven.ChecksumContentValidator.SUFFIX_MD5;
@@ -494,24 +495,24 @@ public abstract class AbstractMavenRepository
         && request.getRequestPath() != null && !request.getRequestPath().startsWith("/.")) {
 
       if (request.getRequestPath().endsWith(SUFFIX_SHA1)) {
-        expireRemoteHash(request, SUFFIX_SHA1, ATTR_REMOTE_SHA1);
+        expireRemoteHash(request, SUFFIX_SHA1);
       }
       else if (request.getRequestPath().endsWith(SUFFIX_MD5)) {
-        expireRemoteHash(request, SUFFIX_MD5, ATTR_REMOTE_MD5);
+        expireRemoteHash(request, SUFFIX_MD5);
       }
     }
 
     return super.doExpireProxyCaches(request, filter);
   }
 
-  private void expireRemoteHash(ResourceStoreRequest hashRequest, String suffix, String remoteAttribute) {
+  private void expireRemoteHash(ResourceStoreRequest hashRequest, String suffix) {
     final String hashPath = hashRequest.getRequestPath();
     final String itemPath = hashPath.substring(0, hashPath.length() - suffix.length());
     hashRequest.pushRequestPath(itemPath);
     try {
       // TODO: do we need to persist this? or will remote hash be refetched before attributes are re-loaded?
       StorageItem artifact = getLocalStorage().retrieveItem(this, hashRequest);
-      artifact.getRepositoryItemAttributes().remove(remoteAttribute);
+      artifact.getRepositoryItemAttributes().put(ATTR_REMOTE_HASH_EXPIRED, "true");
     }
     catch (Exception e) {
       log.debug("Skip expiring remote hash in repository {} because it does not contain path='{}'.", this, itemPath);
