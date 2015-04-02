@@ -16,25 +16,29 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 
-//import org.sonatype.nexus.events.EventSubscriber;
+import org.sonatype.nexus.events.EventSubscriber;
 import org.sonatype.nexus.security.UserPrincipalsExpired;
 
 import com.google.common.eventbus.AllowConcurrentEvents;
 import com.google.common.eventbus.Subscribe;
 import org.apache.shiro.subject.SimplePrincipalCollection;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
  * Ensures that API keys for deleted users are removed.
- *
- * TODO: Ensure this receives events.
  */
 @Named
 @Singleton
 final class NugetApiKeyEventInspector
-    //implements EventSubscriber
+    implements EventSubscriber
 {
+  private final NugetApiKeyStore keyStore;
+
   @Inject
-  private NugetApiKeyStore keyStore;
+  public NugetApiKeyEventInspector(final NugetApiKeyStore keyStore) {
+    this.keyStore = checkNotNull(keyStore);
+  }
 
   @Subscribe
   @AllowConcurrentEvents

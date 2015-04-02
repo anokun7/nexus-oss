@@ -14,12 +14,17 @@ package com.sonatype.nexus.repository.nuget.internal.security;
 
 import javax.annotation.Nullable;
 
+import org.sonatype.sisu.goodies.lifecycle.Lifecycle;
+
 import org.apache.shiro.subject.PrincipalCollection;
 
 /**
  * Persistent mapping between principals (such as user IDs) and API-Keys.
+ *
+ * @since 3.0
  */
 public interface NugetApiKeyStore
+    extends Lifecycle
 {
   /**
    * Creates an API-Key and assigns it to the given principals.

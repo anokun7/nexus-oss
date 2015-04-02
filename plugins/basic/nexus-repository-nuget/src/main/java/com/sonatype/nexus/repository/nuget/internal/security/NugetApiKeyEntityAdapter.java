@@ -49,7 +49,6 @@ public class NugetApiKeyEntityAdapter
     extends CollectionEntityAdapter<NugetApiKeyEntity>
 {
   private static final String DB_CLASS = new OClassNameBuilder()
-      .prefix("security")
       .type(NugetApiKeyEntityAdapter.class)
       .build();
 

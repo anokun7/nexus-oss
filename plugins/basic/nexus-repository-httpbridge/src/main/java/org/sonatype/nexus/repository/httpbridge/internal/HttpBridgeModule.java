@@ -51,8 +51,8 @@ public class HttpBridgeModule
       @Override
       protected void configure() {
         addFilterChain(MOUNT_POINT + "/**",
-            NexusApiKeyAuthenticationFilter.NAME,
             NexusBasicHttpAuthenticationFilter.NAME,
+            NexusApiKeyAuthenticationFilter.NAME,
             AnonymousFilter.NAME);
       }
     });

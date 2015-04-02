@@ -30,7 +30,7 @@ import org.slf4j.LoggerFactory;
  * {@link AuthenticationTokenFactory} that creates {@link NugetAuthenticationToken}s if a configured HTTP header
  * is present.
  *
- * @since 2.7
+ * @since 3.0
  */
 @Named
 @Singleton

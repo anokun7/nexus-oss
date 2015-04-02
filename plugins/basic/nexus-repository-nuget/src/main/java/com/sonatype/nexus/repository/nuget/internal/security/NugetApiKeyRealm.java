@@ -32,8 +32,10 @@ import org.eclipse.sisu.Description;
 
 /**
  * {@link AuthenticatingRealm} that maps NuGet API-Keys to valid {@link Subject}s.
+ *
+ * @since 3.0
  */
-@Named(NugetApiKey.ROLE)
+@Named(NugetApiKey.NAME)
 @Singleton
 @Description("NuGet API-Key Realm")
 public final class NugetApiKeyRealm
@@ -49,12 +51,12 @@ public final class NugetApiKeyRealm
 
   @Override
   public String getName() {
-    return NugetApiKey.ROLE;
+    return NugetApiKey.NAME;
   }
 
   @Override
   public boolean supports(final AuthenticationToken token) {
-    return token instanceof NexusApiKeyAuthenticationToken && NugetApiKey.ROLE.equals(token.getPrincipal());
+    return token instanceof NexusApiKeyAuthenticationToken && NugetApiKey.NAME.equals(token.getPrincipal());
   }
 
   @Override

@@ -20,10 +20,10 @@ import org.sonatype.nexus.security.authc.NexusApiKey;
 /**
  * NuGet API-Key; used by tools when uploading/deleting packages.
  */
-@Named(NugetApiKey.ROLE)
+@Named(NugetApiKey.NAME)
 @Singleton
 public final class NugetApiKey
     implements NexusApiKey
 {
-  public static final String ROLE = "X-NuGet-ApiKey";
+  public static final String NAME = "X-NuGet-ApiKey";
 }

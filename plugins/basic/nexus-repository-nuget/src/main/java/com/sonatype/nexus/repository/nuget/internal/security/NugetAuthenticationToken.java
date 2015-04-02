@@ -17,7 +17,7 @@ import org.sonatype.nexus.security.authc.HttpHeaderAuthenticationToken;
 /**
  * Rut Auth specific {@link HttpHeaderAuthenticationToken}.
  *
- * @since 2.7
+ * @since 3.0
  */
 public class NugetAuthenticationToken
     extends HttpHeaderAuthenticationToken
