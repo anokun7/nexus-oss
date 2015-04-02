@@ -146,14 +146,12 @@ Ext.define('NX.controller.Drilldown', {
 
     me.addEvents(
       /**
-       * @event beforeload
-       * Fires before a store is loaded
+       * @event beforeaction
+       * Fires before an action is performed
        *
-       * @param index Which master to load
-       * @param bookmark The bookmark to navigate to
-       * @param cb The callback function to call after load
+       * @param button The button to click
        */
-      'beforeload'
+      'beforeaction'
     );
   },
 
@@ -196,9 +194,7 @@ Ext.define('NX.controller.Drilldown', {
     var me = this,
       bookmark = NX.Bookmarks.getBookmark().getSegments();
 
-    if (me.fireEvent('beforeload', 0, bookmark, cb)) {
-      me.loadStoreAtIndex(0, bookmark, cb);
-    }
+    me.loadStoreAtIndex(0, bookmark, cb);
   },
 
   /**

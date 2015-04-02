@@ -121,9 +121,6 @@ Ext.define('NX.controller.Menu', {
         },
         '#Refresh': {
           beforerefresh: me.warnBeforeRefresh
-        },
-        '#Drilldown': {
-          beforeload: me.warnBeforeLoadStore
         }
       },
       component: {
@@ -139,7 +136,13 @@ Ext.define('NX.controller.Menu', {
           beforesearch: me.warnBeforeSearch
         },
         '#breadcrumb button': {
-          click: me.warnBeforeBreadcrumbClick
+          click: me.warnBeforeBreadcrumbNav
+        },
+        'nx-drilldown-actions button:not([action=delete]):not([menu])': {
+          click: me.warnBeforeButtonClick
+        },
+        'nx-drilldown-actions menuitem': {
+          click: me.warnBeforeButtonClick
         },
         'button[mode]': {
           afterrender: me.registerModeButton,
@@ -712,12 +715,26 @@ Ext.define('NX.controller.Menu', {
    * @private
    * Check for unsaved changes before navigating via the breadcrumb
    */
-  warnBeforeBreadcrumbClick: function(button, e) {
+  warnBeforeBreadcrumbNav: function(button, e) {
     var me = this;
 
     return me.warnBeforeNavigate(
       function() {
         button.handler.call(button.scope, button, e);
+      }
+    );
+  },
+
+  /**
+   * @private
+   * Check for unsaved changes before clicking a button
+   */
+  warnBeforeButtonClick: function(button, e) {
+    var me = this;
+
+    return me.warnBeforeNavigate(
+      function() {
+        button.fireEvent('click', button, e);
       }
     );
   },
@@ -733,21 +750,6 @@ Ext.define('NX.controller.Menu', {
     return me.warnBeforeNavigate(
       function() {
         button.fireEvent('click');
-      }
-    )
-  },
-
-  /**
-   * @private
-   * Check for unsaved changes before loading a drilldown store
-   */
-  warnBeforeLoadStore: function(index, bookmark, cb) {
-    var me = this;
-
-    console.log("warnBeforeLoadStore");
-    return me.warnBeforeNavigate(
-      function() {
-        NX.getApplication.getController('Drilldown').loadStoreAtIndex(index, bookmark, cb);
       }
     )
   },
