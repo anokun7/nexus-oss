@@ -72,7 +72,7 @@ class JmxCustomizer
               }
               catch (e) {
                 log.trace "Unable to fetch attribute: ${attr.name}; ignoring", e
-                attrs[attr.name] = "ERROR: $e"
+                // do not include attribute detail for failure
               }
             }
           }
