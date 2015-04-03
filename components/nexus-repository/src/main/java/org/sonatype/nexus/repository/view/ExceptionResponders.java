@@ -33,15 +33,19 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public class ExceptionResponders
   extends ComponentSupport
 {
-  private final List<ExceptionResponder> mappers;
+  private final List<ExceptionResponder> responders;
 
   @Inject
-  public ExceptionResponders(final List<ExceptionResponder> mappers) {
-    this.mappers = checkNotNull(mappers);
+  public ExceptionResponders(final List<ExceptionResponder> responders) {
+    this.responders = checkNotNull(responders);
   }
 
   @Nullable
   public ExceptionResponder<?> find(final Throwable exception) {
+    checkNotNull(exception);
+
+    // TODO: Figure out which of the available responders applies
+
     return null;
   }
 }
