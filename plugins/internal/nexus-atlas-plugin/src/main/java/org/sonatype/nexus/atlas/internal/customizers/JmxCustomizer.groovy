@@ -30,7 +30,7 @@ import static org.sonatype.nexus.supportzip.SupportBundle.ContentSource.Priority
 import static org.sonatype.nexus.supportzip.SupportBundle.ContentSource.Type.JMX
 
 /**
- * Adds JMX information (mbean dump) to support bundle.
+ * Adds JMX information (mbean+readable-attributes dump) to support bundle.
  *
  * @since 3.0
  */
