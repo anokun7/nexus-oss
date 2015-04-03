@@ -68,7 +68,7 @@ public class ConfigurableViewFacet
     catch (Throwable e) {
       log.trace("Dispatch failure", e);
 
-      // attempt to map
+      // attempt to respond from exception
       ExceptionResponder responder = exceptionResponders.find(e);
       if (responder != null) {
         log.trace("Generating response from exception with: {}", responder);
