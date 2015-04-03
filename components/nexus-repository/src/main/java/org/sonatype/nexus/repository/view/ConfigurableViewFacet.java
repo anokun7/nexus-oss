@@ -12,10 +12,15 @@
  */
 package org.sonatype.nexus.repository.view;
 
+import java.util.List;
+
+import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.sonatype.nexus.common.collect.NestedAttributesMap;
 import org.sonatype.nexus.repository.FacetSupport;
+
+import com.google.common.base.Throwables;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
@@ -32,9 +37,16 @@ public class ConfigurableViewFacet
 {
   public static final String CONFIG_KEY = "view";
 
+  private final ExceptionMappers exceptionMappers;
+
   private Router router;
 
   private Boolean online;
+
+  @Inject
+  public ConfigurableViewFacet(final ExceptionMappers exceptionMappers) {
+    this.exceptionMappers = checkNotNull(exceptionMappers);
+  }
 
   public void configure(final Router router) {
     checkNotNull(router);
@@ -52,7 +64,25 @@ public class ConfigurableViewFacet
   @Override
   public Response dispatch(final Request request) throws Exception {
     checkState(router != null, "Router not configured");
-    return router.dispatch(getRepository(), request);
+    try {
+      return router.dispatch(getRepository(), request);
+    }
+    catch (Throwable e) {
+      log.trace("Dispatch failure", e);
+
+      // attempt to map
+      ExceptionMapper mapper = exceptionMappers.find(e);
+      if (mapper != null) {
+        log.trace("Mapping response from exception with: {}", mapper);
+
+        //noinspection unchecked
+        return mapper.map(request, e);
+      }
+
+      // else propagate
+      Throwables.propagateIfPossible(e, Exception.class);
+      throw Throwables.propagate(e);
+    }
   }
 
   @Override
