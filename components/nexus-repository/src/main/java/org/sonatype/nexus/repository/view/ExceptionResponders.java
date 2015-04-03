@@ -24,24 +24,24 @@ import org.sonatype.sisu.goodies.common.ComponentSupport;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * Helper to manage {@link ExceptionMapper} instances.
+ * Helper to manage {@link ExceptionResponder} instances.
  *
  * @since 3.0
  */
 @Named
 @Singleton
-public class ExceptionMappers
+public class ExceptionResponders
   extends ComponentSupport
 {
-  private final List<ExceptionMapper> mappers;
+  private final List<ExceptionResponder> mappers;
 
   @Inject
-  public ExceptionMappers(final List<ExceptionMapper> mappers) {
+  public ExceptionResponders(final List<ExceptionResponder> mappers) {
     this.mappers = checkNotNull(mappers);
   }
 
   @Nullable
-  public ExceptionMapper<?> find(final Throwable exception) {
+  public ExceptionResponder<?> find(final Throwable exception) {
     return null;
   }
 }

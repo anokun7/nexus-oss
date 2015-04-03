@@ -12,8 +12,6 @@
  */
 package org.sonatype.nexus.repository.view;
 
-import java.util.List;
-
 import javax.inject.Inject;
 import javax.inject.Named;
 
@@ -37,15 +35,15 @@ public class ConfigurableViewFacet
 {
   public static final String CONFIG_KEY = "view";
 
-  private final ExceptionMappers exceptionMappers;
+  private final ExceptionResponders exceptionResponders;
 
   private Router router;
 
   private Boolean online;
 
   @Inject
-  public ConfigurableViewFacet(final ExceptionMappers exceptionMappers) {
-    this.exceptionMappers = checkNotNull(exceptionMappers);
+  public ConfigurableViewFacet(final ExceptionResponders exceptionResponders) {
+    this.exceptionResponders = checkNotNull(exceptionResponders);
   }
 
   public void configure(final Router router) {
@@ -71,12 +69,12 @@ public class ConfigurableViewFacet
       log.trace("Dispatch failure", e);
 
       // attempt to map
-      ExceptionMapper mapper = exceptionMappers.find(e);
-      if (mapper != null) {
-        log.trace("Mapping response from exception with: {}", mapper);
+      ExceptionResponder responder = exceptionResponders.find(e);
+      if (responder != null) {
+        log.trace("Generating response from exception with: {}", responder);
 
         //noinspection unchecked
-        return mapper.map(request, e);
+        return responder.respond(request, e);
       }
 
       // else propagate

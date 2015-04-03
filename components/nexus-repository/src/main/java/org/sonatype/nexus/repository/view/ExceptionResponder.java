@@ -13,14 +13,11 @@
 package org.sonatype.nexus.repository.view;
 
 /**
- * Maps an exception to a response.
+ * Generates a response from an exception.
  *
  * @since 3.0
  */
-public interface ExceptionMapper<E extends Throwable>
+public interface ExceptionResponder<E extends Throwable>
 {
-  /**
-   * Map an exception to a response.
-   */
-  Response map(Request request, E cause);
+  Response respond(Request request, E failure);
 }
